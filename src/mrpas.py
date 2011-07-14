@@ -1,4 +1,30 @@
 #!/usr/bin/env python
+"""
+PHP MRPAS
+Copyright (c) 2010 Dominik Marczuk
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * The name of Dominik Marczuk may not be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY DOMINIK MARCZUK ``AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL DOMINIK MARCZUK BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
 import random
 import sys
 import curses
@@ -27,7 +53,7 @@ class mainmap:
             self.cells.append(cell())
     def generate (self):
         for i in xrange(self.nbcells + 1):
-            if random.randint(0, 100) > 1:
+            if random.randint(0, 100) > 10:
                 self.cells[i].transparent = True
                 self.cells[i].walkable = True
             else:
@@ -61,12 +87,11 @@ class MRPAS:
         totalObstacles = 0
         obstaclesInLastLine = 0
         minAngle = 0.0
-        x = 0
-        y = 0
+        x = 0.0
+        y = playerY + dy
         #do while there are unblocked slopes left and the algo is within
         # the map's boundaries
         #scan progressive lines/columns from the PC outwards
-        y = playerY + dy
         if y < 0 or y >= m.height:
             done = True
         while not done:
@@ -79,8 +104,8 @@ class MRPAS:
             done = True
             x = playerX + (processedCell * dx)
             while x >= minx and x <= maxx:
-                c = x + (y * m.width)
                 #calculate slopes per cell
+                c = x + (y * m.width)
                 visible = True
                 startSlope = processedCell * slopesPerCell
                 centreSlope = startSlope + halfSlopes
@@ -94,8 +119,8 @@ class MRPAS:
                                 visible = False
                         else:
                             if startSlope >= startAngle[idx] and endSlope <= endAngle[idx]:
-                                visible = False;
-                        if visible and (m.cells[c - (m.width * dy)].fov == False or\
+                                visible = False
+                        if visible and (not m.cells[c - (m.width * dy)].fov or\
                                   not m.cells[c - (m.width * dy)].transparent)\
                                   and (x - dx >= 0 and x - dx < m.width and\
                                   (m.cells[c - (m.width * dy) - dx].fov == False\
@@ -109,10 +134,10 @@ class MRPAS:
                     #if the cell is opaque, block the adjacent slopes
                     if not m.cells[int(c)].transparent:
                         if minAngle >= startSlope:
-                            minAngle = endSlope
+                            minAngle = copy.deepcopy(endSlope)
                         else:
-                            startAngle[totalObstacles] = startSlope
-                            endAngle[totalObstacles+1] = endSlope
+                            startAngle[totalObstacles] = copy.deepcopy(startSlope)
+                            endAngle[totalObstacles] = copy.deepcopy(endSlope)
                             totalObstacles += 1
                         if (not lightWalls):
                             m.cells[int(c)].fov = False
@@ -134,11 +159,10 @@ class MRPAS:
         totalObstacles = 0
         obstaclesInLastLine = 0
         minAngle = 0.0
-        x = 0
+        x = (playerX + dx) #the outer slope's coordinates (first processed line)
         y = 0
         #do while there are unblocked slopes left and the algo is within the map's boundaries
         #scan progressive lines/columns from the PC outwards
-        x = playerX + dx #the outer slope's coordinates (first processed line)
         if  x < 0 or x >= m.width:
             done = True
         while not done:
@@ -180,10 +204,10 @@ class MRPAS:
                     #if the cell is opaque, block the adjacent slopes
                     if not m.cells[int(c)].transparent:
                         if minAngle >= startSlope:
-                            minAngle = endSlope
+                            minAngle = copy.deepcopy(endSlope)
                         else:
-                            startAngle[totalObstacles] = startSlope
-                            endAngle[totalObstacles+1] = endSlope
+                            startAngle[totalObstacles] = copy.deepcopy(startSlope)
+                            endAngle[totalObstacles] = copy.deepcopy(endSlope)
                             totalObstacles += 1
                         if not lightWalls:
                             m.cells[int(c)].fov = False
@@ -219,7 +243,7 @@ key = "0"
 x1, y1 = playerPosX, playerPosY
 while 1:
     screen.refresh()
-    fov.computeFov(m, playerPosX, playerPosY, 200 , True)
+    fov.computeFov(m, playerPosX, playerPosY, 20 , True)
     for j in xrange(mapHeight - 1):
         for i in xrange(mapWidth - 1):
             screen.addstr(j, i, m.displayTile(j * mapWidth + i))
