@@ -284,4 +284,4 @@ while key != "q":
 etime = time.time()
 curses.endwin()
 ttime = etime - stime
-print "Start: %f, End: %f,Running, %f seconds." % (stime,etime,ttime)
+print "Start: %f, End: %f, Running: %f seconds." % (stime,etime,ttime)
