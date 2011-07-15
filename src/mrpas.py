@@ -248,7 +248,7 @@ x1, y1 = playerPosX, playerPosY
 stime = time.time()
 while key != "q":
     screen.refresh()
-    fov.computeFov(m, playerPosX, playerPosY, 100 , True)
+    fov.computeFov(m, playerPosX, playerPosY, 1000 , True)
     for j in xrange(mapHeight - 1):
         for i in xrange(mapWidth - 1):
             screen.addstr(j, i, m.displayTile(j * mapWidth + i))
@@ -277,6 +277,17 @@ while key != "q":
     elif key == "3" or key == "n" or key == 338:
         x1 += 1
         y1 += 1
+    elif key == "R":
+        for j in xrange(mapHeight - 1):
+            for i in xrange(mapWidth - 1):
+                m.cells[j * mapWidth + i].transparent = True
+                m.cells[j * mapWidth + i].walkable = True
+    elif key == "x":
+        m.cells[playerPosY * mapWidth + playerPosX].transparent = False
+        m.cells[playerPosY * mapWidth + playerPosX].walkable = False
+    elif key == "a":
+        m.cells[playerPosY * mapWidth + playerPosX].transparent = True
+        m.cells[playerPosY * mapWidth + playerPosX].walkable = True
     if m.cells[x1 * mapWidth + y1].walkable and \
     x1 >= 0 and x1 < mapHeight - 1 and y1 >= 0 and y1 < mapWidth - 1:
         playerPosX = y1
