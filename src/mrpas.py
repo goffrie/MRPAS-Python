@@ -29,6 +29,7 @@ import random
 import sys
 import curses
 import copy
+import time
 
 screen = curses.initscr()
 
@@ -53,7 +54,7 @@ class mainmap:
             self.cells.append(cell())
     def generate (self):
         for i in xrange(self.nbcells + 1):
-            if random.randint(0, 100) > 10:
+            if random.randint(0, 100) > 1:
                 self.cells[i].transparent = True
                 self.cells[i].walkable = True
             else:
@@ -241,9 +242,10 @@ m.generate();
 fov = MRPAS()
 key = "0"
 x1, y1 = playerPosX, playerPosY
-while 1:
+stime = time.time()
+while key != "q":
     screen.refresh()
-    fov.computeFov(m, playerPosX, playerPosY, 20 , True)
+    fov.computeFov(m, playerPosX, playerPosY, 100 , True)
     for j in xrange(mapHeight - 1):
         for i in xrange(mapWidth - 1):
             screen.addstr(j, i, m.displayTile(j * mapWidth + i))
@@ -272,9 +274,14 @@ while 1:
     elif key == "3" or key == "n" or key == 338:
         x1 += 1
         y1 += 1
-    if m.cells[x1 * mapWidth + y1].walkable:
+    if m.cells[x1 * mapWidth + y1].walkable and \
+    x1 >= 0 and x1 < mapHeight - 1 and y1 >= 0 and y1 < mapWidth - 1:
         playerPosX = y1
         playerPosY = x1
     else:
         y1 = playerPosX
         x1 = playerPosY
+etime = time.time()
+curses.endwin()
+ttime = etime - stime
+print "Start: %f, End: %f,Running, %f seconds." % (stime,etime,ttime)
