@@ -55,7 +55,8 @@ class mainmap:
         self.cells = []
         for i in xrange(self.nbcells + 1):
             self.cells.append(cell())
-    def generate (self):
+
+   def generate (self):
         for i in xrange(self.nbcells + 1):
             if random.randint(0, 100) > 1:
                 self.cells[i].transparent = True
@@ -64,6 +65,7 @@ class mainmap:
                 self.cells[i].transparent = False
                 self.cells[i].walkable = False
             self.cells[i].fov = False
+
     def displayTile(self, idx):
         if self.cells[idx].walkable:
             if self.cells[idx].fov == True:
